@@ -74,5 +74,7 @@ predicted_classes <- predict_class(class_probabilities, iris)
 # Affichage des classes prédites
 print(predicted_classes)
 
+predicted_classes[2]
+
 
 

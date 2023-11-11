@@ -11,7 +11,7 @@ fit<-function(X,y,transfo=FALSE,nb_classe=6){
    #print(X[,])
    if (is.factor(X[,i])) {
      #La variable est catégorielle
-     pint("ici")
+
      
    } else {
      #La variable n'est pas catégorielle

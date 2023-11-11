@@ -1,4 +1,6 @@
 library(parallel)
+
+
 dis<-function(X,nb_classe=6){
   
   mini=min(X)
@@ -15,11 +17,8 @@ dis<-function(X,nb_classe=6){
 
 
 gen_disc<-function(X,nb_classe=6){
-  if(is.data.frame(nb_class)){
-    
-  }else{
-      X <- data.frame(apply(X, MARGIN = 2, FUN = function(x) dis(x,nb_classe)))
-  }
+  X <- data.frame(apply(X, MARGIN = 2, FUN = function(i) dis(i,nb_classe)))
+return(X)
 }
 
 

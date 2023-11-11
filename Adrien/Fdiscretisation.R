@@ -26,3 +26,5 @@ data("iris")
 X= iris[, -ncol(iris)]
 
 print(gen_disc(X))
+
+irlande=gen_disc(X)

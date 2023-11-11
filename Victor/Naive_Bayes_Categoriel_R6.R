@@ -1,5 +1,6 @@
 library(R6)
 
+### CLASSE NB ####
 NaiveBayes <- R6Class("NaiveBayes",
                       public = list(
                         prior_prob = NULL,

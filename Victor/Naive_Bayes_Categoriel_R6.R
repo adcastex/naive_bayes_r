@@ -74,8 +74,8 @@ NaiveBayes <- R6Class("NaiveBayes",
                         },
                         predict_proba = function(new_data) {
                           # Extraire les probabilités a priori et conditionnelles du modèle
-                          prior_prob <- self$prior_prob
-                          cond_probs <- self$cond_probs
+                          prior_prob <- private$prior_prob
+                          cond_probs <- private$cond_probs
                           
                           # Initialiser une matrice pour stocker les probabilités pour chaque classe
                           probabilities <- matrix(0, nrow = nrow(new_data), ncol = length(prior_prob), dimnames = list(NULL, names(prior_prob)))
@@ -108,6 +108,13 @@ NaiveBayes <- R6Class("NaiveBayes",
                         nb_classe = NULL,
                         prior_prob = NULL,
                         cond_probs = NULL,
+                        nb_data_train = NULL,
+                        nb_variables = NULL,
+                        nb_out_classe = NULL,
+                        nb_valu = NULL,
+                        min_parc_df = NULL,
+                        max_parc_df = NULL,
+                        
                         
                         dis = function(X){
                           
@@ -125,6 +132,19 @@ NaiveBayes <- R6Class("NaiveBayes",
                         gen_disc = function(X){
                           X <- data.frame(apply(X, MARGIN = 2, FUN = function(i) self$dis(i,private$nb_classe)))
                           return(X)
+                        },
+                        
+                        etu_data = function(X,y){
+                          print("on est dans etudata")
+                          self$nb_variables = ncol(mon_dataframe)
+                          self$nb_data_train = length(X)
+                          self$nb_out_classe = unique(y)
+                          self$min_parc_df = sapply(X, min)
+                          self$miax_parc_df = sapply(X, max)
+                        },
+                        
+                        compt_val = function(X){
+                          self$nb_valu <- sapply(mon_dataframe, function(col) length(unique(col)))
                         }
                       )
 )
@@ -178,5 +198,5 @@ cat("Prédictions:", predictions, "\n")
 
 # Get class probabilities
 probabilities <- nb_model$predict_proba(new_data)
-cat("Probabilités:\n")
-print(probabilities)
+print(cat("Probabilités:\n",probabilities))
+#print(probabilities)

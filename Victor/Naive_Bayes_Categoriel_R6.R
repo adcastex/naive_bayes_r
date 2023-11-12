@@ -4,6 +4,9 @@ library(R6)
 NaiveBayes <- R6Class("NaiveBayes",
                       public = list(
                         fit = function(X, y, preproc = NULL, nb_classe = 6) {
+                          
+                          private$etu_data(X,y)
+                          
                           # Je set les varable preproc et nb_classe si initialisé
                           if(!is.null(preproc)){
                            private$preproc=preproc
@@ -101,6 +104,15 @@ NaiveBayes <- R6Class("NaiveBayes",
                           
                           # Renvoyer la matrice de probabilités
                           return(probabilities)
+                        },
+                        print=function(){
+                          print(private$nb_variables)
+                          sortie=paste("Le Model sur le quel l'apprentissage a été réalisé est un Naive Bayes Catégorielle. l'apprentissage a été réalisé sur",
+                                     private$nb_variables,
+                                     "variables et sur un enssemble de",
+                                     private$nb_data_train,
+                                     "Données d'entrainement")
+                          print(sortie)
                         }
                       ),
                       private = list(
@@ -136,11 +148,11 @@ NaiveBayes <- R6Class("NaiveBayes",
                         
                         etu_data = function(X,y){
                           print("on est dans etudata")
-                          self$nb_variables = ncol(mon_dataframe)
-                          self$nb_data_train = length(X)
-                          self$nb_out_classe = unique(y)
-                          self$min_parc_df = sapply(X, min)
-                          self$miax_parc_df = sapply(X, max)
+                          private$nb_variables = ncol(X)
+                          private$nb_data_train = nrow(X)
+                          private$nb_out_classe = unique(y)
+                          private$min_parc_df = sapply(X, min)
+                          private$max_parc_df = sapply(X, max)
                         },
                         
                         compt_val = function(X){
@@ -200,3 +212,5 @@ cat("Prédictions:", predictions, "\n")
 probabilities <- nb_model$predict_proba(new_data)
 print(cat("Probabilités:\n",probabilities))
 #print(probabilities)
+
+nb_model$print()

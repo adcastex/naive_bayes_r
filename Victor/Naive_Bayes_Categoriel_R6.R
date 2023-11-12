@@ -16,7 +16,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                           
                           # A voir pour faire une petite Etude de données ici 
                           
-                          
+                          private$compt_val(X)
                           
                           
                           # Probabilités a priori de chaque classe des données d'entraînement
@@ -113,6 +113,15 @@ NaiveBayes <- R6Class("NaiveBayes",
                                      private$nb_data_train,
                                      "Données d'entrainement")
                           print(sortie)
+                        },
+                        
+                        summary=function(){
+                          print(paste("Votre varriabla à prédire a ", length(private$nb_out_classe)," classes"))
+
+                          df=rbind(private$min_parc_df, private$max_parc_df, private$nb_valu)
+                          row.names(df) <- c("min","max", "Nombre de valeurs")
+                          print(df)
+                          
                         }
                       ),
                       private = list(
@@ -156,7 +165,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                         },
                         
                         compt_val = function(X){
-                          self$nb_valu <- sapply(mon_dataframe, function(col) length(unique(col)))
+                          private$nb_valu <- sapply(X, function(col) length(unique(col)))
                         }
                       )
 )
@@ -188,14 +197,18 @@ gen_disc<-function(X,nb_classe=6){
 data(iris)
 set.seed(42)
 n_rows <- nrow(iris)
+
 train_index <- sample(1:n_rows, 0.7 * n_rows)
 test_index <- setdiff(1:n_rows, train_index)
 train_data <- iris[train_index, ]
 test_data <- iris[test_index, ]
 
+
 X= gen_disc(train_data[, -ncol(train_data)])
 y=train_data$Species
 new_data <- gen_disc(test_data[, -5])
+
+print(X)
 
 ################ UTILISER LA CLASSE  ##########
 # Create an instance of the NaiveBayes class
@@ -213,4 +226,4 @@ probabilities <- nb_model$predict_proba(new_data)
 print(cat("Probabilités:\n",probabilities))
 #print(probabilities)
 
-nb_model$print()
+nb_model$summary()

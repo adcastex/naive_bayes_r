@@ -3,9 +3,19 @@ library(R6)
 ### CLASSE NB ####
 NaiveBayes <- R6Class("NaiveBayes",
                       public = list(
-                        prior_prob = NULL,
-                        cond_probs = NULL,
-                        fit = function(X, y) {
+                        fit = function(X, y, preproc = NULL, nb_classe = 6) {
+                          # Je set les varable preproc et nb_classe si initialisé
+                          if(!is.null(preproc)){
+                           private$preproc=preproc
+                           private$nb_classe=nb_classe
+                           X=private$gen_disc(X)
+                          }
+                          
+                          # A voir pour faire une petite Etude de données ici 
+                          
+                          
+                          
+                          
                           # Probabilités a priori de chaque classe des données d'entraînement
                           prior_prob <- table(y) / nrow(X)
                           cond_probs <- list()
@@ -24,14 +34,14 @@ NaiveBayes <- R6Class("NaiveBayes",
                           }
                           
                           # Set the attributes
-                          self$prior_prob <- prior_prob
-                          self$cond_probs <- cond_probs
+                          private$prior_prob <- prior_prob
+                          private$cond_probs <- cond_probs
                           return(self)
                         },
                         predict = function(new_data) {
                           # Extraire les probabilités a priori et conditionnelles du modèle
-                          prior_prob <- self$prior_prob
-                          cond_probs <- self$cond_probs
+                          prior_prob <- private$prior_prob
+                          cond_probs <- private$cond_probs
                           
                           # Initialiser un vecteur pour stocker les prédictions
                           predictions <- vector("character", length = nrow(new_data))
@@ -91,6 +101,30 @@ NaiveBayes <- R6Class("NaiveBayes",
                           
                           # Renvoyer la matrice de probabilités
                           return(probabilities)
+                        }
+                      ),
+                      private = list(
+                        preproc = NULL,
+                        nb_classe = NULL,
+                        prior_prob = NULL,
+                        cond_probs = NULL,
+                        
+                        dis = function(X){
+                          
+                          mini=min(X)
+                          print(mini)
+                          maxi=max(X)
+                          print (maxi)
+                          inter=(maxi-mini)/self$nb_classe
+                          points_de_coupure <- seq(from = mini, to = maxi, by = inter)
+                          
+                          disc <- cut(X, breaks = points_de_coupure, labels = FALSE, include.lowest=TRUE)
+                          return(disc)
+                        },
+                        
+                        gen_disc = function(X){
+                          X <- data.frame(apply(X, MARGIN = 2, FUN = function(i) self$dis(i,private$nb_classe)))
+                          return(X)
                         }
                       )
 )

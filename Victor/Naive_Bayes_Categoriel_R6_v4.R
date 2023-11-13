@@ -196,6 +196,8 @@ NaiveBayes <- R6Class("NaiveBayes",
                         min_parc_df = NULL,
                         max_parc_df = NULL,
                         
+                        nan_replace = 0,
+                        
                         ###Fonction -- Discrétisation
                         dis = function(X){
                           print("oui1")
@@ -235,6 +237,10 @@ NaiveBayes <- R6Class("NaiveBayes",
                         ###Fonction -- Compte le nombre de variable
                         compt_val = function(X){
                           private$nb_valu <- sapply(X, function(col) length(unique(col)))
+                        },
+                        nan_rem = function(X){
+                         X<- replace(X, is.nan(X), private$nan_replace)
+                         return(X)
                         }
                       )
 )

@@ -5,7 +5,10 @@ NaiveBayes <- R6Class("NaiveBayes",
                       public = list(
                         
                         ###Fonction -- Fit 
-                        fit = function(X, y, preproc = NULL, nb_classe = 6) {
+                        fit = function(X, y, preproc = NULL, nb_classe = 6, val_rem = NULL) {
+                          if(!is.null(val_rem))
+                            private$nan_replace = val_rem
+                          
                           
                           private$etu_data(X,y)
                           
@@ -238,6 +241,8 @@ NaiveBayes <- R6Class("NaiveBayes",
                         compt_val = function(X){
                           private$nb_valu <- sapply(X, function(col) length(unique(col)))
                         },
+                        
+                        
                         nan_rem = function(X){
                          X<- replace(X, is.nan(X), private$nan_replace)
                          return(X)

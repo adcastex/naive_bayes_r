@@ -13,7 +13,9 @@ NaiveBayes <- R6Class("NaiveBayes",
                           if (!is.null(preproc)) {
                             private$preproc = preproc
                             private$nb_classe = nb_classe
+                            print("ici c'est bon ")
                             X = private$gen_disc(X)
+                            print("ici c'est bon 2")
                             print(X)
                           }
                           
@@ -196,12 +198,17 @@ NaiveBayes <- R6Class("NaiveBayes",
                         
                         ###Fonction -- Discrétisation
                         dis = function(X){
-                          
+                          print("oui1")
                           mini=min(X)
                           print(mini)
                           maxi=max(X)
                           print (maxi)
-                          inter=(maxi-mini)/self$nb_classe
+                          print("oui2")
+                          print(mini)
+                          print(maxi)
+                          
+                          inter=(maxi-mini)/private$nb_classe
+                          print(inter)
                           points_de_coupure <- seq(from = mini, to = maxi, by = inter)
                           
                           disc <- cut(X, breaks = points_de_coupure, labels = FALSE, include.lowest=TRUE)
@@ -210,7 +217,8 @@ NaiveBayes <- R6Class("NaiveBayes",
                         
                         #Fonction -- Application discrétisation
                         gen_disc = function(X){
-                          X <- data.frame(apply(X, MARGIN = 2, FUN = function(i) self$dis(i,private$nb_classe)))
+                          print("oui3")
+                          X <- data.frame(apply(X, MARGIN = 2, FUN = function(i) private$dis(i)))
                           return(X)
                         },
                         
@@ -273,7 +281,7 @@ new_data <- gen_disc(test_data[, -5])
 nb_model <- NaiveBayes$new()
 
 # Fit le model avec X et Y et on utilise le preprocessing
-nb_model$fit(X, y, preproc = NULL)
+nb_model$fit(X, y, preproc = TRUE)
 
 # Predictions des classes
 predictions <- nb_model$predict(new_data)

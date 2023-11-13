@@ -17,7 +17,8 @@ NaiveBayes <- R6Class("NaiveBayes",
                             print(X)
                           }
                           
-                          
+                          print(X)
+                          print("Iralnde")
                           # A voir pour faire une petite Etude de données ici 
                           
                           private$compt_val(X)

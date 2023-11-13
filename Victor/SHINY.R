@@ -320,7 +320,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   data <- reactive({
     req(input$file)
-    read.csv(input$file$datapath)
+    read.csv(input$file$datapath, sep = ',')
   })
   
   observe({

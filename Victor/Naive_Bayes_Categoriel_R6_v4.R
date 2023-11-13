@@ -238,6 +238,8 @@ NaiveBayes <- R6Class("NaiveBayes",
                         compt_val = function(X){
                           private$nb_valu <- sapply(X, function(col) length(unique(col)))
                         },
+                        
+                        ###Fonction -- Remplace les NA
                         nan_rem = function(X){
                          X<- replace(X, is.nan(X), private$nan_replace)
                          return(X)

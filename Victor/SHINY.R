@@ -6,7 +6,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                       public = list(
                         
                         ###Fonction -- Fit 
-                        fit = function(X, y, preproc = NULL, nb_classe = 6) {
+                        fit = function(X, y, preproc = NULL, nb_classe = 6, epsilon = NULL) {
                           
                           private$etu_data(X,y)
                           
@@ -16,10 +16,14 @@ NaiveBayes <- R6Class("NaiveBayes",
                             private$nb_classe = nb_classe
                             X = private$gen_disc(X)
                             print(X)
+                            
                           }
                           
-                          print(X)
+                          print(y)
+                          print(typeof(y))
                           print("Iralnde")
+                          print(nrow(X))
+                          print(length(y))
                           # A voir pour faire une petite Etude de données ici 
                           
                           private$compt_val(X)
@@ -30,14 +34,17 @@ NaiveBayes <- R6Class("NaiveBayes",
                           cond_probs <- list()
                           features <-names(X)
                           
+                          # Ajout d'un epsilon = ne pas avoir de proba conditionnelle = 0 et ne pas biaiser les résultats des probas postérieures
+                          if (!is.null(epsilon)) {
+                            private$epsilon <- epsilon
+                          }
+                          
                           # Probabilités conditionnelles
                           # On applique à chaque valeur de la classe des données d'entraînement une fonction
                           for (i in 1:ncol(X)) {
                             cond_probs[[i]] <- matrix(0, nrow = length(levels(X[, i])), ncol = length(unique(y)), dimnames = list(levels(X[, i]), levels(y)))
                             
-                            # Ajout d'un epsilon = ne pas avoir de proba conditionnelle = 0 et ne pas biaiser les résultats des probas postérieures
-                            epsilon <- 0.001
-                            cross_table <- table(X[, i], y) + epsilon
+                            cross_table <- table(X[, i], y) + private$epsilon
                             
                             # Calculer les probabilités conditionnelles
                             cond_probs[[i]] <- t(prop.table(cross_table, margin = 2))
@@ -97,22 +104,23 @@ NaiveBayes <- R6Class("NaiveBayes",
                           # Extraire les probabilités a priori et conditionnelles du modèle
                           prior_prob <- private$prior_prob
                           cond_probs <- private$cond_probs
-                          
                           # Initialiser un vecteur pour stocker les prédictions
                           predictions <- vector("character", length = nrow(new_data))
-                          
                           # Pour chaque individu dans les nouvelles données
                           for (i in 1:nrow(new_data)) {
                             # Initialiser les probabilités postérieures pour chaque classe
                             posterior_probs <- rep(1, length(prior_prob))
-                            
-                            # Pour chaque caractéristique (colonne) dans les nouvelles données
                             for (j in 1:ncol(new_data)) {
                               # Mettre à jour les probabilités postérieures en fonction des probabilités conditionnelles
                               feature_values <- as.character(new_data[i, j])
-                              posterior_probs <- posterior_probs * cond_probs[[j]][, feature_values]
+                              if (!is.null(cond_probs[[j]]) && feature_values %in% colnames(cond_probs[[j]])) {
+                                posterior_probs <- posterior_probs * cond_probs[[j]][, feature_values]
+                              } else {
+                                posterior_probs <- posterior_probs * private$epsilon
+                              }
+                              
+                              print(j)
                             }
-                            
                             # Normaliser les probabilités postérieures
                             posterior_probs <- posterior_probs * prior_prob
                             posterior_probs <- posterior_probs / sum(posterior_probs)
@@ -122,8 +130,9 @@ NaiveBayes <- R6Class("NaiveBayes",
                             
                             # Stocker la prédiction dans le vecteur de prédictions
                             predictions[i] <- predicted_class
+                            
                           }
-                          
+                          print("LA FIN DE CBON")
                           # Renvoyer le vecteur de prédictions
                           return(predictions)
                         },
@@ -145,7 +154,13 @@ NaiveBayes <- R6Class("NaiveBayes",
                             # Pour chaque caractéristique (colonne) dans les nouvelles données
                             for (j in 1:ncol(new_data)) {
                               # Mettez à jour les probabilités postérieures en fonction des probabilités conditionnelles
-                              posterior_probs <- posterior_probs * cond_probs[[j]][, as.character(new_data[i, j])]
+                              feature_values <- as.character(new_data[i, j])
+                              
+                              if (!is.null(cond_probs[[j]]) && feature_values %in% colnames(cond_probs[[j]])) {
+                                posterior_probs <- posterior_probs * cond_probs[[j]][, as.character(new_data[i, j])]
+                              } else {
+                                posterior_probs <- posterior_probs * private$epsilon
+                              }
                             }
                             
                             # Normaliser les probabilités postérieures
@@ -194,6 +209,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                         nb_valu = NULL,
                         min_parc_df = NULL,
                         max_parc_df = NULL,
+                        epsilon = 0.001,
                         
                         ###Fonction -- Discrétisation
                         dis = function(X){
@@ -270,28 +286,7 @@ new_data <- gen_disc(test_data[, -5])
 
 
 ################ UTILISER LA CLASSE  ##########
-# Création de l'instance nbModel
-nb_model <- NaiveBayes$new()
 
-# Fit le model avec X et Y et on utilise le preprocessing
-nb_model$fit(X, y, preproc = NULL)
-
-# Predictions des classes
-predictions <- nb_model$predict(new_data)
-cat("Prédictions:", predictions, "\n")
-
-# Avoir les probabilités d'appartenances des classes
-probabilities <- nb_model$predict_proba(new_data)
-print(cat("Probabilités:\n",probabilities))
-
-#Summary
-nb_model$summary()
-
-#Print info
-nb_model$print()
-
-#Plot
-nb_model$compute_and_plot_importance()
 
 ### SHIny #####
 nb_model <- NaiveBayes$new()
@@ -303,6 +298,8 @@ ui <- fluidPage(
     sidebarPanel(
       fileInput("file", "Sélectionnez le fichier CSV"),
       selectInput("target_variable", "Sélectionnez la variable cible", choices = NULL),
+      selectInput("separator", "Séparateur", choices = c(",", ";"), selected = ","),
+      selectInput("decimal", "Décimal", choices = c(".", ","), selected = "."),
       actionButton("process_data", "Traiter les données")
     ),
     mainPanel(
@@ -320,7 +317,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   data <- reactive({
     req(input$file)
-    read.csv(input$file$datapath, sep = ',')
+    read.csv(input$file$datapath, sep = input$separator, dec = input$decimal)
   })
   
   observe({

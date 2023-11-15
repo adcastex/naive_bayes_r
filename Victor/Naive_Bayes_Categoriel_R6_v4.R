@@ -6,6 +6,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                         
                         ###Fonction -- Fit 
                         fit = function(X, y, preproc = NULL, nb_classe = 6, val_rem = NULL) {
+                          
                           if(!is.null(val_rem))
                             private$nan_replace = val_rem
                           

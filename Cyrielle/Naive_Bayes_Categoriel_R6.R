@@ -3,12 +3,12 @@ library(R6)
 ### CLASSE NB ####
 NaiveBayes <- R6Class("NaiveBayes",
                       public = list(
-                        fit = function(X, y, preproc = NULL, nb_classe = 6) {
+                        fit = function(X, y, preproc = FALSE, nb_classe = 6) {
                           
                           private$etu_data(X,y)
                           
                           # Je set les varable preproc et nb_classe si initialisé
-                          if(!is.null(preproc)){
+                          if(preproc){
                            private$preproc=preproc
                            private$nb_classe=nb_classe
                            X=private$gen_disc(X)

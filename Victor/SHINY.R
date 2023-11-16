@@ -211,6 +211,9 @@ NaiveBayes <- R6Class("NaiveBayes",
                         max_parc_df = NULL,
                         epsilon = 0.001,
                         
+                        med = NULL,
+                        classe_maj = NULL,
+                        
                         ###Fonction -- Discrétisation
                         dis = function(X){
                           

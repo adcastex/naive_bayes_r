@@ -17,10 +17,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                           if (!is.null(preproc)) {
                             private$preproc = preproc
                             private$nb_classe = nb_classe
-                            print("ici c'est bon ")
                             X = private$gen_disc(X)
-                            print("ici c'est bon 2")
-                            print(X)
                           }
                           
                           print(X)
@@ -190,9 +187,11 @@ NaiveBayes <- R6Class("NaiveBayes",
                       private = list(
                         preproc = NULL,
                         nb_classe = NULL,
+                        
                         prior_prob = NULL,
                         cond_probs = NULL,
                         features = NULL,
+                        
                         nb_data_train = NULL,
                         nb_variables = NULL,
                         nb_out_classe = NULL,
@@ -201,6 +200,9 @@ NaiveBayes <- R6Class("NaiveBayes",
                         max_parc_df = NULL,
                         
                         nan_replace = 0,
+                        
+                        med = NULL,
+                        classe_maj = NULL,
                         
                         ###Fonction -- Discrétisation
                         dis = function(X){

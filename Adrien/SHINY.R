@@ -19,10 +19,8 @@ NaiveBayes <- R6Class("NaiveBayes",
 
                           # Gestion des NA dans le X
                           if(g_na && any(is.na(X))){
-                            print("oui 2")
                             type_col = lapply(X, class)
-                            print(paste("les type des col", type_col, "je suis dans le gestion NA"))
-                            X = private$rem_na(X,type_col)
+                            X = private$rem_na(X, type_col, "fit")
                             print('fini les gestion des NA')
 
                           }
@@ -123,6 +121,8 @@ NaiveBayes <- R6Class("NaiveBayes",
                         ###Fonction -- Predict classe appartenance
                         predict = function(new_data) {
                           # Extraire les probabilités a priori et conditionnelles du modèle
+                          type_col = lapply(X, class)
+                          new_data = private$rem_na(new_data, type_col, "predic")
                           prior_prob <- private$prior_prob
                           cond_probs <- private$cond_probs
                           # Initialiser un vecteur pour stocker les prédictions
@@ -238,32 +238,53 @@ NaiveBayes <- R6Class("NaiveBayes",
                         classe_maj = NULL,
 
                         # remplacement des NA
-                        rem_na = function(X,liste_class ){
-                          print(liste_class)
-                          for (i in 1:length(liste_class)){
-                            print(i)
-                            if(liste_class[i]=="numeric"){
+                        rem_na = function(X, liste_class, fonc){
+                          if(fonc=="fit"){
+                            for (i in 1:length(liste_class)){
+                              print(i)
+                              if(liste_class[i]=="numeric"){
+                                private$list_remp_NA = append(private$list_remp_NA,round(mean(X[,i], na.rm = TRUE),digits = 2))
+                                liste=X[,i]
 
 
-                              private$list_remp_NA = append(private$list_remp_NA,round(mean(X[,i], na.rm = TRUE),digits = 2))
-                              liste=X[,i]
+                                liste[is.na(liste)] = private$list_remp_NA[i]
 
+                                liste=as.double(liste)
 
-                              liste[is.na(liste)] = private$list_remp_NA[i]
+                                X[,i] = liste
 
-                              liste=as.double(liste)
-
-                              X[,i] = liste
-
-                            }else{
-                              liste=X[,i]
-                              table_occurrences <- table(X[,i])
-                              classe_majoritaire <- names(table_occurrences)[which.max(table_occurrences)]
-                              private$list_remp_NA = append(private$list_remp_NA,classe_majoritaire)
-                              liste[is.na(liste)] = private$list_remp_NA[i]
-                              X[,i]=liste
+                              }else{
+                                liste=X[,i]
+                                table_occurrences <- table(X[,i])
+                                classe_majoritaire <- names(table_occurrences)[which.max(table_occurrences)]
+                                private$list_remp_NA = append(private$list_remp_NA,classe_majoritaire)
+                                liste[is.na(liste)] = private$list_remp_NA[i]
+                                liste=as.double(liste)
+                                X[,i]=liste
+                              }
                             }
-                          }
+                          }else{
+
+                            for (i in 1:length(liste_class)){
+                              if(liste_class[i]=="numeric"){
+                                liste=X[,i]
+
+                                liste[is.na(liste)] = private$list_remp_NA[i]
+
+                                liste=as.double(liste)
+
+                                X[,i] = liste
+
+                              }else{
+                                liste=X[,i]
+                                table_occurrences <- table(X[,i])
+                                liste[is.na(liste)] = private$list_remp_NA[i]
+                                liste=as.double(liste)
+                                X[,i]=liste
+                              }
+                              }
+                            }
+
 
                           return(X)
                         },

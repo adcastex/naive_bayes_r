@@ -121,8 +121,11 @@ NaiveBayes <- R6Class("NaiveBayes",
                         ###Fonction -- Predict classe appartenance
                         predict = function(new_data) {
                           # Extraire les probabilités a priori et conditionnelles du modèle
-                          type_col = lapply(X, class)
-                          new_data = private$rem_na(new_data, type_col, "predic")
+                          if(any(is.na(new_data))){
+                            type_col = lapply(X, class)
+                            new_data = private$rem_na(new_data, type_col, "predic")
+                          }
+
                           prior_prob <- private$prior_prob
                           cond_probs <- private$cond_probs
                           # Initialiser un vecteur pour stocker les prédictions

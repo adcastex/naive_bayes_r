@@ -9,5 +9,5 @@ Description: More about what it does (maybe more than one line)
 License: GPL-3
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2023-11-19 18:04:29 UTC; adriencastex
-Built: R 4.3.2; ; 2023-11-19 18:04:33 UTC; unix
+Packaged: 2023-11-20 11:34:39 UTC; adriencastex
+Built: R 4.3.2; ; 2023-11-20 11:34:44 UTC; unix

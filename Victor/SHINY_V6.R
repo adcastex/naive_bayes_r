@@ -2,8 +2,6 @@ library(shiny)
 library(e1071)
 library(R6)
 library(shinythemes)
-library(xlsx)
-library(shinyFiles)
 ### CLASSE NB ####
 NaiveBayes <- R6Class("NaiveBayes",
                       public = list(

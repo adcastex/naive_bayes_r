@@ -25,7 +25,7 @@ NaiveBayes <- R6Class("NaiveBayes",
 
                           }
 
-                          print(X)
+                          
 
                           #Si l'utilisateur n'indique pas que ses données sont déja pretraitées alors preproc
                           if (!is.null(preproc)) {
@@ -119,9 +119,9 @@ NaiveBayes <- R6Class("NaiveBayes",
                         },
 
                         ###Fonction -- Predict classe appartenance
-                        predict = function(new_data) {
+                        predict = function(new_data, g_na = TRUE) {
                           # Extraire les probabilités a priori et conditionnelles du modèle
-                          if(any(is.na(new_data))){
+                          if(any(is.na(new_data)&&g_na)){
                             type_col = lapply(X, class)
                             new_data = private$rem_na(new_data, type_col, "predic")
                           }
@@ -162,9 +162,9 @@ NaiveBayes <- R6Class("NaiveBayes",
                         },
 
                         ###Fonction -- Predict Proba appartenance
-                        predict_proba = function(new_data) {
+                        predict_proba = function(new_data, g_na = TRUE) {
                           # Extraire les probabilités a priori et conditionnelles du modèle
-                          if(any(is.na(new_data))){
+                          if(any(is.na(new_data)) && g_na = TRUE){
                             type_col = lapply(X, class)
                             new_data = private$rem_na(new_data, type_col, "predic")
                           }

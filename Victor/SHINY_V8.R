@@ -20,9 +20,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                           # Gestion des NA dans le X
                           if(g_na && any(is.na(X))){
                             type_col = lapply(X, class)
-                            print(paste("les type des col", type_col, "je suis dans le gestion NA"))
                             X = private$rem_na(X,type_col)
-                            
                           }
                           
                           
@@ -30,7 +28,8 @@ NaiveBayes <- R6Class("NaiveBayes",
                           if (preproc==TRUE) {
                             private$preproc = preproc
                             private$nb_classe = nb_classe
-                            X = private$gen_disc(X)
+                            X = private$gen_disc(X,"fit")
+                            
                           }
                           
                           # A voir pour faire une petite Etude de données ici
@@ -109,12 +108,10 @@ NaiveBayes <- R6Class("NaiveBayes",
                         },
                         
                         ###Fonction -- Predict classe appartenance
-                        predict = function(new_data,preproc=TRUE,nb_classe = 6) {
+                        predict = function(new_data) {
                           #Si l'utilisateur n'indique pas que ses données sont déja pretraitées alors preproc
-                          if (preproc==TRUE) {
-                            private$preproc = preproc
-                            private$nb_classe = nb_classe
-                            new_data = private$gen_disc(new_data)
+                          if (private$preproc==TRUE) {
+                            new_data = private$gen_disc(new_data,"pred")
                           }
                           
                           
@@ -155,12 +152,10 @@ NaiveBayes <- R6Class("NaiveBayes",
                         },
                         
                         ###Fonction -- Predict Proba appartenance
-                        predict_proba = function(new_data,preproc=TRUE,nb_classe = 6) {
+                        predict_proba = function(new_data) {
                           
-                          if (preproc==TRUE) {
-                            private$preproc = preproc
-                            private$nb_classe = nb_classe
-                            new_data = private$gen_disc(new_data)
+                          if (private$preproc==TRUE) {
+                            new_data = private$gen_disc(new_data,"pred")
                           }
                           
                           
@@ -238,6 +233,8 @@ NaiveBayes <- R6Class("NaiveBayes",
                         med = NULL,
                         classe_maj = NULL,
                         
+                        matrice_param_preproc = NULL,
+                        
                         # remplacement des NA
                         rem_na = function(X,liste_class ){
                           for (i in 1:length(liste_class)){
@@ -268,22 +265,52 @@ NaiveBayes <- R6Class("NaiveBayes",
                         },
                         
                         ###Fonction -- Discrétisation
-                        dis = function(X){
-                          if(class(X)=="numeric"){
-                            mini=min(X)
-                            maxi=max(X)
-                            inter=(maxi-mini)/private$nb_classe
-                            points_de_coupure <- seq(from = mini, to = maxi, by = inter)
-                            
-                            disc <- cut(X, breaks = points_de_coupure, labels = FALSE, include.lowest=TRUE)
-                            return(disc)
-                          }
+                        dis = function(X, col, place){
                           
+                          if (place=="fit"){
+                            if(class(X)=="numeric"){
+                              mini=min(X, na.rm = TRUE)
+                              private$matrice_param_preproc[1,col] = mini
+                              
+                              maxi=max(X, na.rm = TRUE)
+                              private$matrice_param_preproc[2,col] = maxi
+                              
+                              inter=(maxi-mini)/private$nb_classe
+                              private$matrice_param_preproc[3,col] = inter
+                              
+                              points_de_coupure <- seq(from = mini, to = maxi, by = inter)
+                              
+                              disc <- cut(X, breaks = points_de_coupure, labels = FALSE, include.lowest=TRUE)
+                              
+                            }
+                            
+                          }else{
+                            mini = private$matrice_param_preproc[1,col]
+                            if(min(X, na.rm = TRUE) < mini){
+                              mini = min(X, na.rm = TRUE)
+                            }
+                            maxi = private$matrice_param_preproc[2,col]
+                            if(max(X, na.rm = TRUE) > maxi){
+                              maxi = max(X, na.rm = TRUE)
+                            }
+                            
+                            inter = private$matrice_param_preproc[3,col]
+                            
+                            points_de_coupure <- seq(from = mini, to = maxi, by = inter)
+                            disc <- cut(X, breaks = points_de_coupure, labels = FALSE, include.lowest=TRUE)
+                            }
+                          return(disc)
                         },
                         
                         #Fonction -- Application discrétisation
-                        gen_disc = function(X){
-                          X <- data.frame(apply(X, MARGIN = 2, FUN = function(i) private$dis(i)))
+                        gen_disc = function(X, place){
+                          if(place=="fit"){
+                            private$matrice_param_preproc = matrix(0, nrow = 3, ncol = length(X))
+                          }
+                          for (i in 1:length(X)){
+                            X[,i] <- private$dis(X[,i], i, place)
+                          }
+                          
                           return(X)
                         },
                         
@@ -418,7 +445,7 @@ server <- function(input, output, session) {
       y_train <- train_data[, input$target_variable]
       X_test <- test_data[, setdiff(names(data()), input$target_variable)]
       y_test <- test_data[, input$target_variable]
-      predictions <- nb_model$predict(X_test, preproc=T)
+      predictions <- nb_model$predict(X_test)
       comparison_result <- y_test == predictions
       count_identical <- sum(comparison_result)
       
@@ -432,7 +459,7 @@ server <- function(input, output, session) {
   #Predict
   output$data_table <- renderTable({
     if (input$predict_new_data > 0) {
-      new_data_predictions <- nb_model$predict(new_data(),preproc = T)
+      new_data_predictions <- nb_model$predict(new_data())
       combined_data <- cbind(new_data(), Prediction = new_data_predictions)
       return(combined_data)
     }
@@ -508,3 +535,39 @@ gen_disc<-function(X,nb_classe=6){
   X <- data.frame(apply(X, MARGIN = 2, FUN = function(i) dis(i,nb_classe)))
   return(X)
 }
+
+
+
+
+
+### test fonction preproc
+
+#data("iris")
+#iris[1,1] = NA
+#iris[3,3] = NA
+#iris[149,3] = NA
+
+#siris <- iris[sample(nrow(iris)), ]
+
+#train = siris[1:100,]
+#test = siris[101:150,]
+
+
+
+#Xtrain = train[, -ncol(iris)]
+#ytrain = train$Species
+
+#Xtest = test[, -ncol(iris)]
+#ytest = test$Species
+
+#model = NaiveBayes$new()
+#model$fit(Xtrain,ytrain)
+
+#tmp=model$predict(Xtest)
+#model$predict_proba(Xtest)
+
+
+
+
+#nombre_elements_identiques <- sum(tmp == ytest)
+

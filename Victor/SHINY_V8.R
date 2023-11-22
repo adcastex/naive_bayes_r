@@ -2,6 +2,7 @@ library(shiny)
 library(e1071)
 library(R6)
 library(shinythemes)
+library(xlsx)
 ### CLASSE NB ####
 NaiveBayes <- R6Class("NaiveBayes",
                       public = list(
@@ -379,6 +380,7 @@ ui <- navbarPage(
                     HTML("<h3 style='text-align: left;'>Nouvelles données</h3>"),
                     tableOutput("new_data_table"),
                     actionButton("export_button", "Exporter les données sous format Excel"),
+                    textOutput("export_message"),
              )
            )
   ),
@@ -483,6 +485,10 @@ server <- function(input, output, session) {
     print(full_path)
     write.xlsx(combined_data,full_path, row.names = FALSE)
     output$export_message <- renderText("Données exportées avec succès!")
+    # Mettez à jour le message d'exportation
+    output$export_message <- renderText({
+      paste("Les données ont été exportées avec succès ici:", full_path)
+    })
   })
   
   
@@ -504,12 +510,11 @@ server <- function(input, output, session) {
     updateSelectInput(session, "new_data_target_variable", choices = choices)
   })
   
+  
   #Affiche le df new_data
   output$new_data_table <- renderTable({
-    if (input$predict_new_data > 0) {
       new_data_table <- head(new_data(), n = 7)
       return(new_data_table)
-    }
   })
 }
 

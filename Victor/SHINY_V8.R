@@ -282,25 +282,33 @@ NaiveBayes <- R6Class("NaiveBayes",
                               points_de_coupure <- seq(from = mini, to = maxi, by = inter)
                               
                               disc <- cut(X, breaks = points_de_coupure, labels = FALSE, include.lowest=TRUE)
+                              return(disc)
                               
+                            }else{
+                              return(X)
                             }
                             
                           }else{
-                            mini = private$matrice_param_preproc[1,col]
-                            if(min(X, na.rm = TRUE) < mini){
-                              mini = min(X, na.rm = TRUE)
+                            if(class(X)=="numeric"){
+                              mini = private$matrice_param_preproc[1,col]
+                              if(min(X, na.rm = TRUE) < mini){
+                                mini = min(X, na.rm = TRUE)
+                              }
+                              maxi = private$matrice_param_preproc[2,col]
+                              if(max(X, na.rm = TRUE) > maxi){
+                                maxi = max(X, na.rm = TRUE)
+                              }
+                              
+                              inter = private$matrice_param_preproc[3,col]
+                              
+                              points_de_coupure <- seq(from = mini, to = maxi, by = inter)
+                              disc <- cut(X, breaks = points_de_coupure, labels = FALSE, include.lowest=TRUE)
+                              
+                              return(disc)
+                            }else{
+                              return(X)
                             }
-                            maxi = private$matrice_param_preproc[2,col]
-                            if(max(X, na.rm = TRUE) > maxi){
-                              maxi = max(X, na.rm = TRUE)
-                            }
-                            
-                            inter = private$matrice_param_preproc[3,col]
-                            
-                            points_de_coupure <- seq(from = mini, to = maxi, by = inter)
-                            disc <- cut(X, breaks = points_de_coupure, labels = FALSE, include.lowest=TRUE)
-                            }
-                          return(disc)
+                          }
                         },
                         
                         #Fonction -- Application discrétisation
@@ -545,34 +553,21 @@ gen_disc<-function(X,nb_classe=6){
 
 
 
-### test fonction preproc
-
-#data("iris")
-#iris[1,1] = NA
-#iris[3,3] = NA
-#iris[149,3] = NA
-
-#siris <- iris[sample(nrow(iris)), ]
-
-#train = siris[1:100,]
-#test = siris[101:150,]
 
 
 
-#Xtrain = train[, -ncol(iris)]
-#ytrain = train$Species
+#donne=read.csv("/Users/adriencastex/Downloads/healthcare_dataset.csv")
 
-#Xtest = test[, -ncol(iris)]
-#ytest = test$Species
+#Xtrain = donne[, -ncol(donne)]
+#ytrain = donne$Test.Results
+#is.factor(Xtrain[,1])
 
 #model = NaiveBayes$new()
 #model$fit(Xtrain,ytrain)
 
-#tmp=model$predict(Xtest)
-#model$predict_proba(Xtest)
+#tmp=model$predict(Xtrain)
 
 
 
-
-#nombre_elements_identiques <- sum(tmp == ytest)
+#nombre_elements_identiques <- sum(tmp == ytrain)
 

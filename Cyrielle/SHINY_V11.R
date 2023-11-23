@@ -428,24 +428,26 @@ ui <- navbarPage(
 
 
 
-# Définir le serveur
+#Server
 server <- function(input, output, session) {
   data <- reactive({
     req(input$file)
     read.csv(input$file$datapath, sep = input$separator, dec = input$decimal, header = input$header)
   })
   
+  #Target variable
   observe({
     choices <- names(data())
     updateSelectInput(session, "target_variable", choices = choices)
   })
   
+  #Explanatory variables
   observe({
     choices <- names(data())
     updateSelectInput(session, "explanatory_variables", choices = choices)
   })
   
-  #Affiche le df data train
+  #Show the train dataset
   output$raw_data_table <- renderTable({
     df <- head(data(), n = 7)
     return(df)
@@ -454,7 +456,7 @@ server <- function(input, output, session) {
   predictions <- reactiveVal(NULL)
   test_data <- reactiveVal(NULL)
   
-  #Met en place le fit
+  #Fitting the model
   observe({
     if (input$process_data > 0) {
       n_rows <- nrow(data())
@@ -470,10 +472,9 @@ server <- function(input, output, session) {
     }
   })
   
-  # Affiche l'accuracy
+  #Calculate and show the accuracy
   output$accuracy_output <- renderText({
     if (input$process_data > 0) {
-      #Données d'entrée
       n_rows <- nrow(data())
       train_index <- sample(1:n_rows, 0.7 * n_rows)
       test_index <- setdiff(1:n_rows, train_index)
@@ -491,46 +492,13 @@ server <- function(input, output, session) {
     }
   })
   
-  # Affiche le résultat de la fonction print du modèle
+  #Show the result the summary and information about the model
   output$model_output <- renderPrint({
     if (input$process_data>0) {
       nb_model$Summary()
       nb_model$Print()
     }
   })
-  
-  #Predict
-  output$data_table <- renderTable({
-    if (input$predict_new_data > 0) {
-      new_data_predictions <- nb_model$predict(new_data()[, input$explanatory_variables])
-      combined_data <- cbind(new_data(), Prediction = new_data_predictions)
-      return(combined_data)
-    }
-  })
-  
-  #Affichage la predictions des nouvelles données
-  output$predictions_table <- renderTable({
-    if (input$predict_new_data > 0) {
-      probabilities <- nb_model$predict_proba(new_data()[, input$explanatory_variables])
-      return(probabilities)
-    }
-  })
-  
-  # Gestion de l'export Excel
-  observeEvent(input$export_button, {
-    new_data_predictions <- nb_model$predict(new_data()[, input$explanatory_variables])
-    combined_data <- cbind(new_data(), Prediction = new_data_predictions)
-    current_directory <- normalizePath(getwd())
-    filename <- "exported_data.xlsx"
-    full_path <- paste0(current_directory, "\\", filename)
-    print(full_path)
-    write.xlsx(combined_data,full_path, row.names = FALSE)
-    # Mettez à jour le message d'exportation
-    output$export_message <- renderText({
-      paste("Les données ont été exportées avec succès ici:", full_path)
-    })
-  })
-  
   
   #Plot importance variables
   output$importance_plot <- renderPlot({
@@ -539,23 +507,51 @@ server <- function(input, output, session) {
     }
   })
   
-  #Charge les nouvelles données
+  #Load the new_data(the data to predict)
   new_data <- reactive({
     req(input$new_file)
     read.csv(input$new_file$datapath, sep = input$new_separator, dec = input$new_decimal, header = input$new_header)
   })
   
-  
-  
-  
-  #Affiche le df new_data
+  #Show the dataset to predict
   output$new_data_table <- renderTable({
     new_data_table <- head(new_data(), n = 7)
     return(new_data_table)
+  })
+  
+  #Predict and return full dataset with the predicted class
+  output$data_table <- renderTable({
+    if (input$predict_new_data > 0) {
+      new_data_predictions <- nb_model$predict(new_data()[, input$explanatory_variables])
+      combined_data <- cbind(new_data(), Prediction = new_data_predictions)
+      return(combined_data)
+    }
+  })
+  
+  #Show the probability of membership of classes
+  output$predictions_table <- renderTable({
+    if (input$predict_new_data > 0) {
+      probabilities <- nb_model$predict_proba(new_data()[, input$explanatory_variables])
+      return(probabilities)
+    }
+  })
+  
+  #Export the prediction in Excel file
+  observeEvent(input$export_button, {
+    new_data_predictions <- nb_model$predict(new_data()[, input$explanatory_variables])
+    combined_data <- cbind(new_data(), Prediction = new_data_predictions)
+    current_directory <- normalizePath(getwd())
+    filename <- "exported_data.xlsx"
+    full_path <- paste0(current_directory, "\\", filename)
+    print(full_path)
+    write.xlsx(combined_data,full_path, row.names = FALSE)
+    output$export_message <- renderText({
+      paste("Les données ont été exportées avec succès ici:", full_path)
+    })
   })
 }
 
 
 
-# Lancer l'application Shiny
+#Launch the app
 shinyApp(ui, server)

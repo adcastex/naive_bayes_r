@@ -3,6 +3,7 @@ library(e1071)
 library(R6)
 library(shinythemes)
 library(xlsx)
+library(doParallel)
 
 NaiveBayes <- R6Class("NaiveBayes",
                       public = list(

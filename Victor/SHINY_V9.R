@@ -3,7 +3,6 @@ library(e1071)
 library(R6)
 library(shinythemes)
 library(xlsx)
-### CLASSE NB ####
 NaiveBayes <- R6Class("NaiveBayes",
                       public = list(
                         
@@ -121,7 +120,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                           cond_probs <- private$cond_probs
                           # Initialiser un vecteur pour stocker les prédictions
                           predictions <- vector("character", length = nrow(new_data))
-
+                          
                           # Pour chaque individu dans les nouvelles données
                           for (i in 1:nrow(new_data)) {
                             # Initialiser les probabilités postérieures pour chaque classe
@@ -143,7 +142,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                             
                             # Sélectionner la classe avec la probabilité la plus élevée
                             predicted_class <- names(prior_prob)[which.max(posterior_probs)]
-
+                            
                             # Stocker la prédiction dans le vecteur de prédictions
                             predictions[i] <- predicted_class
                             
@@ -325,7 +324,6 @@ NaiveBayes <- R6Class("NaiveBayes",
                         
                         ###Fonction -- Stats Desc
                         etu_data = function(X,y){
-                          print("Stats descriptives (à garder ?)")
                           private$nb_variables = ncol(X)
                           private$nb_data_train = nrow(X)
                           private$nb_out_classe = unique(y)
@@ -464,7 +462,7 @@ server <- function(input, output, session) {
       predictions <- nb_model$predict(X_test)
       comparison_result <- y_test == predictions
       count_identical <- sum(comparison_result)
-      
+      nb_model$print()
       # Calcul de l'exactitude (accuracy)
       accuracy <- sum(count_identical) / length(y_test)
       return(accuracy)
@@ -474,7 +472,7 @@ server <- function(input, output, session) {
   # Affiche le résultat de la fonction print du modèle
   output$model_output <- renderPrint({
     if (input$process_data>0) {
-      nb_model$print()
+      nb_model$summary()
     }
   })
   
@@ -538,28 +536,6 @@ server <- function(input, output, session) {
 
 # Lancer l'application Shiny
 shinyApp(ui, server)
-
-dis<-function(X,nb_classe=6){
-  
-  mini=min(X)
-  print(mini)
-  maxi=max(X)
-  print (maxi)
-  inter=(maxi-mini)/nb_classe
-  points_de_coupure <- seq(from = mini, to = maxi, by = inter)
-  
-  disc <- cut(X, breaks = points_de_coupure, labels = FALSE, include.lowest=TRUE)
-  return(disc)
-}
-
-gen_disc<-function(X,nb_classe=6){
-  X <- data.frame(apply(X, MARGIN = 2, FUN = function(i) dis(i,nb_classe)))
-  return(X)
-}
-
-
-
-
 
 
 

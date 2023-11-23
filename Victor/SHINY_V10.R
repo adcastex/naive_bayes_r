@@ -3,6 +3,7 @@ library(e1071)
 library(R6)
 library(shinythemes)
 library(xlsx)
+
 NaiveBayes <- R6Class("NaiveBayes",
                       public = list(
                         
@@ -445,9 +446,9 @@ server <- function(input, output, session) {
       test_index <- setdiff(1:n_rows, train_index)
       train_data <- data()[train_index, ]
       test_data <- data()[test_index, ]
-      X_train <- train_data[, setdiff(names(data()), input$target_variable)]
+      X_train <- train_data[, input$explanatory_variables]
       y_train <- train_data[, input$target_variable]
-      X_test <- test_data[, setdiff(names(data()), input$target_variable)]
+      X_test <- test_data[, input$explanatory_variables]
       y_test <- test_data[, input$target_variable]
       nb_model$fit(X_train, y_train, preproc = input$preproc, epsilon = input$epsilon)
     }
@@ -462,15 +463,13 @@ server <- function(input, output, session) {
       test_index <- setdiff(1:n_rows, train_index)
       train_data <- data()[train_index, ]
       test_data <- data()[test_index, ]
-      X_train <- train_data[, setdiff(names(data()), input$target_variable)]
+      X_train <- train_data[, input$explanatory_variables]
       y_train <- train_data[, input$target_variable]
-      X_test <- test_data[, setdiff(names(data()), input$target_variable)]
+      X_test <- test_data[, input$explanatory_variables]
       y_test <- test_data[, input$target_variable]
       predictions <- nb_model$predict(X_test)
       comparison_result <- y_test == predictions
       count_identical <- sum(comparison_result)
-      nb_model$print()
-      # Calcul de l'exactitude (accuracy)
       accuracy <- sum(count_identical) / length(y_test)
       return(accuracy)
     }
@@ -479,14 +478,15 @@ server <- function(input, output, session) {
   # Affiche le résultat de la fonction print du modèle
   output$model_output <- renderPrint({
     if (input$process_data>0) {
-      nb_model$summary()
+      nb_model$Summary()
+      nb_model$Print()
     }
   })
   
   #Predict
   output$data_table <- renderTable({
     if (input$predict_new_data > 0) {
-      new_data_predictions <- nb_model$predict(new_data())
+      new_data_predictions <- nb_model$predict(new_data()[, input$explanatory_variables])
       combined_data <- cbind(new_data(), Prediction = new_data_predictions)
       return(combined_data)
     }
@@ -495,14 +495,14 @@ server <- function(input, output, session) {
   #Affichage la predictions des nouvelles données
   output$predictions_table <- renderTable({
     if (input$predict_new_data > 0) {
-      probabilities <- nb_model$predict_proba(new_data())
+      probabilities <- nb_model$predict_proba(new_data()[, input$explanatory_variables])
       return(probabilities)
     }
   })
   
   # Gestion de l'export Excel
   observeEvent(input$export_button, {
-    new_data_predictions <- nb_model$predict(new_data())
+    new_data_predictions <- nb_model$predict(new_data()[, input$explanatory_variables])
     combined_data <- cbind(new_data(), Prediction = new_data_predictions)
     current_directory <- normalizePath(getwd())
     filename <- "exported_data.xlsx"

@@ -193,7 +193,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                         },
 
                         ###Fonction -- Print
-                        print=function(){
+                        Print=function(){
                           sortie=paste("Le modèle sur lequel l'apprentissage a été réalisé est un Naive Bayes Catégorielle. l'apprentissage a été réalisé sur",
                                        private$nb_variables,
                                        "variables et sur un ensemble de",
@@ -203,7 +203,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                         },
 
                         ###Fonction -- Summary
-                        summary=function(){
+                        Summary=function(){
                           print(paste("Votre variable à prédire possède ", length(private$nb_out_classe)," classes"))
 
                           df=rbind(private$min_parc_df, private$max_parc_df, private$nb_valu)
@@ -322,7 +322,6 @@ NaiveBayes <- R6Class("NaiveBayes",
 
                         ###Fonction -- Stats Desc
                         etu_data = function(X,y){
-                          print("Stats descriptives (à garder ?)")
                           private$nb_variables = ncol(X)
                           private$nb_data_train = nrow(X)
                           private$nb_out_classe = unique(y)

@@ -1,0 +1,13 @@
+Package: PNaiveBayes
+Type: Package
+Title: NaiveBayes Categorical
+Version: 0.1.0
+Author: Cyrielle Victor Adrien
+Maintainer: The package maintainer <adrien.castex@univ-lyon2.fr>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs wi thin the Description.
+License: GNU
+Encoding: UTF-8
+NeedsCompilation: no
+Packaged: 2023-11-23 14:40:01 UTC; adriencastex
+Built: R 4.3.2; ; 2023-11-23 14:40:06 UTC; unix

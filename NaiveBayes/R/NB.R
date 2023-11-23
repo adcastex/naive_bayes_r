@@ -1,8 +1,5 @@
 library(R6)
 
-
-
-### CLASSE NB ####
 NaiveBayes <- R6Class("NaiveBayes",
                       public = list(
 
@@ -202,6 +199,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                                        "variables et sur un ensemble de",
                                        private$nb_data_train,
                                        "Données d'entrainement")
+                          print(sortie)
                         },
 
                         ###Fonction -- Summary

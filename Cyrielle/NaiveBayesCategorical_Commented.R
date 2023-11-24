@@ -26,7 +26,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                           
                           #Cancel function if y is not a character
                           if(!is.character(y)){
-                            stop("The target variable must be a vector")
+                            stop("The target variable must be a character")
                           }
                           
                           #Cancel function if data missing from target variable y

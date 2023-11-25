@@ -47,3 +47,8 @@ This function will display :
 - A summary of precessing
 - A summary of variables (number of observations, min and max of each variable, number of classes of each variable)
 - Prior probabilities
+
+
+### naive_bayes$compute_and_plot_importance()
+
+This function displays a graph showing the importance of variables 

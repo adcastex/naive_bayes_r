@@ -350,7 +350,7 @@ NaiveBayes <- R6Class("NaiveBayes",
                             if(liste_class[i]=="numeric"){
                               
                               # For numeric columns, replace missing values with the mean of the column
-                              private$list_remp_NA = append(private$list_remp_NA,round(mean(X[,i], na.rm = TRUE),digits = 2))
+                              private$list_remp_NA = append(private$list_remp_NA,round(median(X[,i], na.rm = TRUE),digits = 2))
                               liste=X[,i]
                               liste[is.na(liste)] = private$list_remp_NA[i]
                               liste=as.double(liste)
